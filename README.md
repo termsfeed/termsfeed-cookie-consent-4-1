@@ -2,7 +2,7 @@
 
 Free Cookie Consent is a free cookies management solution by [TermsFeed](https://www.termsfeed.com) that you can integrate on your website that helps you comply with the EU Cookies Directive and GDPR.
 
-The Free Cookie Consent 4.1 can be used to integrate Google Consent Mode V2, see [#Google_Consent_Mode_V2](#Google_Consent_Mode_V2)
+The Free Cookie Consent 4.1 can be used to integrate Google Consent Mode V2, see [Example > Google Consent Mode V2](#google-consent-mode-v2)
 
 **Important!** This is version 4.1, the latest version is [Cookie Consent 4.2](https://github.com/termsfeed/termsfeed-cookie-consent-4-2)
 
