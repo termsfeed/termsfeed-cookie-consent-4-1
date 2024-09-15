@@ -2,6 +2,8 @@
 
 Free Cookie Consent is a free cookies management solution by [TermsFeed](https://www.termsfeed.com) that you can integrate on your website that helps you comply with the EU Cookies Directive and GDPR.
 
+The Free Cookie Consent 4.1 can be used to integrate Google Consent Mode V2, see [#Google_Consent_Mode_V2](#Google_Consent_Mode_V2)
+
 **Important!** This is version 4.1, the latest version is [Cookie Consent 4.2](https://github.com/termsfeed/termsfeed-cookie-consent-4-2)
 
 # Installation
@@ -114,6 +116,127 @@ The below example includes the install + config code, the button to open Prefere
     ga('send', 'pageview');
     </script>
 
+## Google Consent Mode V2
+
+Create the `gtag` function with the default consent states as denied. Then load the Google Analytics script. And then, using the callbacks functionality of the TermsFeed Free Cookie Consent, update the consent states based on user acceptance.
+
+1. First, set the default consent states to `denied`.
+
+        <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){
+                dataLayer.push(arguments);
+        }
+        gtag('consent', 'default', {
+                'ad_storage': 'denied',
+                'ad_user_data': 'denied',
+                'ad_personalization': 'denied',
+                'analytics_storage': 'denied'
+        });
+        </script>
+
+2. Load Google Analytics on your page without tagging it to a specific category. With the default consent states as denied, Google Analytics will adjust its behavior accordingly in order to preserve analytics measurement.
+
+        <script async src="https://www.googletagmanager.com/gtag/js?id=TAG_ID"></script>
+        <script>
+        	window.dataLayer = window.dataLayer || [];
+        	function gtag(){dataLayer.push(arguments);}
+        
+        	gtag('js', new Date());
+        	gtag('config', 'TAG_ID');
+        </script>
+
+3. Update your Cookie Consent config code to include a new parameter called `callbacks` that updates the consent states based on user consent.
+
+        "callbacks": {
+                  "scripts_specific_loaded": (level) => {
+                            switch(level) {
+                                      case 'tracking':
+                                                gtag('consent', 'update', {
+                                                          'analytics_storage': 'granted'
+                                                });
+                                                break;
+                                      case 'targeting':
+                                                gtag('consent', 'update', {
+                                                          'ad_storage': 'granted',
+                                                          'ad_user_data': 'granted',
+                                                          'ad_personalization': 'granted'
+                                                });
+                                                break;
+                            }
+                  }
+        },
+        "callbacks_force": true
+
+4. The final code should look like this:
+
+        <!-- gtag function with denied consent as default -->
+        <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){
+        	dataLayer.push(arguments);
+        }
+        gtag('consent', 'default', {
+                'ad_storage': 'denied',
+                'ad_user_data': 'denied',
+                'ad_personalization': 'denied',
+        	'analytics_storage': 'denied'
+        });
+        </script>
+        <!-- End of gtag function with denied consent as default -->
+        
+        <!-- Load GTM tag script -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=TAG_ID"></script>
+        <script>
+        	window.dataLayer = window.dataLayer || [];
+        	function gtag(){dataLayer.push(arguments);}
+        
+        	gtag('js', new Date());
+        	gtag('config', 'TAG_ID');
+        </script>
+        <!-- End of Load GTM tag script -->
+        
+        <!-- Cookie Consent by TermsFeed https://www.TermsFeed.com -->
+        <script type="text/javascript" src="//www.termsfeed.com/public/cookie-consent/4.1.0/cookie-consent.js" charset="UTF-8"></script>
+        <script type="text/javascript" charset="UTF-8">
+        document.addEventListener('DOMContentLoaded', function () {
+        	cookieconsent.run({
+        		"notice_banner_type": "simple",
+        		"consent_type": "express",
+        		"palette": "dark",
+        		"language": "en",
+        		"page_load_consent_levels": ["strictly-necessary"],
+        		"notice_banner_reject_button_hide": false,
+        		"preferences_center_close_button_hide": false,
+        		"page_refresh_confirmation_buttons": false,
+        		"website_privacy_policy_url": "https://www.termsfeed.com/",
+        		"callbacks": {
+        			"scripts_specific_loaded": (level) => {
+        				switch (level) {
+        					case 'tracking':
+        						gtag('consent', 'update', {
+        							'analytics_storage': 'granted'
+        						});
+        					        break;
+        					case 'targeting':
+        						gtag('consent', 'update', {
+        							'ad_storage': 'granted',
+        							'ad_user_data': 'granted',
+        							'ad_personalization': 'granted'
+        						});
+        					        break;
+        				}
+        			}
+        		},
+        		"callbacks_force": true
+        	});
+        });
+        </script>
+        
+        <noscript>Free cookie consent management tool by <a href="https://www.termsfeed.com/">TermsFeed</a></noscript>
+        <!-- End Cookie Consent by TermsFeed https://www.TermsFeed.com -->
+
+
 # Credits Link
 
 The Credits Link must be kept in the HTML source code (see Example above) and inside the Preferences Center.
@@ -158,8 +281,74 @@ The following configurations are available for the Cookie Consent that can be us
 | `user_consent_token` |  String |  |  | Store your own user consent token (to be used for consent log functionality). |
 | `cookie_domain` |  String |  |  | Sets the domain in the stored cookies (to be used for sub-domains). |
 | `cookie_secure` |  Boolean | `false` | `true`, `false` | Sets the secure flag for the stored cookies. |
+| `callbacks` |   |  |  | See Callbacks below. |
+| `callbacks_force` |  Boolean | `false` | `true`, `false` | Fires callbacks regardless if tagged scripts are available on page or not. |
 | `demo` |  Boolean | `false` | `true`, `false` | Demo mode will not save any cookies. |
 | `debug` |  Boolean | `false` | `true`, `false` | Debug mode will output Console message. |
+
+## Callbacks
+
+You can use callbacks to integrate additional logic with Cookie Consent.
+
+Supported events are:
+
+- `i_agree_button_clicked` (when user has clicked on "I Agree" button)
+- `i_decline_button_clicked` (when user has clicked on "I Decline" button)
+- `change_my_preferences_button_clicked` (when user has clicked on "Change Preferences" button)
+- `scripts_specific_loaded (when scripts` from a specific category have loaded)
+- `user_consent_saved` (when user consent preference is updated)
+
+Example of callbacks code:
+
+        "callbacks": {
+            "notice_banner_loaded": () => {
+                let timestamp = currentDate.toISOString();
+                console.log("[" + timestamp + "] >>>>>>> called notice_banner_loaded callback from dist/index.html");
+            },
+            "i_agree_button_clicked": () => {
+                let timestamp = currentDate.toISOString();
+                console.log("[" + timestamp + "] >>>>>>> called I Agree button callback from dist/index.html");
+            },
+            "i_decline_button_clicked": () => {
+                let timestamp = currentDate.toISOString();
+                console.log("[" + timestamp + "] >>>>>>> called I Decline button callback from dist/index.html");
+            },
+            "change_my_preferences_button_clicked": () => {
+                let timestamp = currentDate.toISOString();
+                console.log("[" + timestamp + "] >>>>>>> called Change My Preferences button callback from dist/index.html");
+            },
+            "scripts_all_loaded": () => {
+                let timestamp = currentDate.toISOString();
+              console.log("[" + timestamp + "] >>>>>>> called Scripts All loaded callback from dist/index.html");
+            },
+            "scripts_specific_loaded": (level) => {
+                let timestamp = currentDate.toISOString();
+        
+                // Levels
+                switch(level) {
+                    case 'strictly-necessary':
+                        console.log("[" + timestamp + "] >>>>>>> called Scripts " + level + " loaded callback from dist/index.html");
+                        break;
+                    case 'functionality':
+                        console.log("[" + timestamp + "] >>>>>>> called Scripts " + level + " loaded callback from dist/index.html");
+                        break;
+                    case 'tracking':
+                        console.log("[" + timestamp + "] >>>>>>> called Scripts " + level + " loaded callback from dist/index.html");
+                        break;
+                    case 'targeting':
+                        console.log("[" + timestamp + "] >>>>>>> called Scripts " + level + " loaded callback from dist/index.html");
+                        break;
+                }
+            }
+        }
+
+You can use function names instead of code to fire your own functions:
+
+        "callbacks": {
+            "scripts_specific_loaded": "my_function_for_scripts_specific_loaded"
+        }
+
+Callbacks are fired only if tagged scripts are found on page. Otherwise, to fire callbacks when consent category is accepted without any tagged scripts on page, add `callbacks_force` as `true`.
 
 # Disclaimer
 
