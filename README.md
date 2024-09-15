@@ -258,6 +258,7 @@ The following methods are available for the Cookie Consent:
 | Name | Description |
 |------|-------------|
 | `cookieconsent.run();` | The `run()` method initiates the Cookie Consent. It accepts the configuration options (see below). |
+| `cookieconsent.openPreferencesCenter();` | The `openPreferencesCenter()` can be used to open the Preferences Center if the classic method (ie. naming the ID of the button/link in the configuration options) is not available. For example, in single-page applications (SPAs). |
 
 # Configuration Options
 
